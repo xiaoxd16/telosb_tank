@@ -13,9 +13,10 @@ enum {
     JOYSTICK_LEFT  = 3,
     JOYSTICK_RIGHT = 4,
 
-    STEER_ANGLE_NOOP = 0,
-    STEER_ANGLE_MIN  = 1800,
-    STEER_ANGLE_MAX  = 5000
+    STEER_ANGLE_NOOP    = 0,
+    STEER_ANGLE_MIN     = 1800,
+    STEER_ANGLE_DEFAULT = 3000,
+    STEER_ANGLE_MAX     = 5000
 };
 
 typedef nx_struct JoyStickMsg {

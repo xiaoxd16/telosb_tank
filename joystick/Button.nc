@@ -1,19 +1,17 @@
 interface Button {
     command void start();
-    event void startDone(error_t error);
-    command void stop();
-    event void stopDone(errot_t error);
+    event void startDone();
 
     command void getButtonA();
-    event void getButtonADone(error_t error);
+    event void getButtonADone(bool isHighPin);
     command void getButtonB();
-    event void getButtonBDone(error_t error);
+    event void getButtonBDone(bool isHighPin);
     command void getButtonC();
-    event void getButtonCDone(error_t error);
+    event void getButtonCDone(bool isHighPin);
     command void getButtonD();
-    event void getButtonDDone(error_t error);
+    event void getButtonDDone(bool isHighPin);
     command void getButtonE();
-    event void getButtonEDone(error_t error);
+    event void getButtonEDone(bool isHighPin);
     command void getButtonF();
-    event void getButtonFDone(error_t error);
+    event void getButtonFDone(bool isHighPin);
 }
