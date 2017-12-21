@@ -15,7 +15,21 @@ module ButtonP {
 
 implementation {
     task void task_start() {
+        call ButtonIOA.clr();
+        call ButtonIOB.clr();
+        call ButtonIOC.clr();
+        call ButtonIOD.clr();
+        call ButtonIOE.clr();
+        call ButtonIOF.clr();
 
+        call ButtonIOA.makeInput();
+        call ButtonIOB.makeInput();
+        call ButtonIOC.makeInput();
+        call ButtonIOD.makeInput();
+        call ButtonIOE.makeInput();
+        call ButtonIOF.makeInput();
+
+        signal Button.startDone();
     }
 
     task void task_getButtonA() {

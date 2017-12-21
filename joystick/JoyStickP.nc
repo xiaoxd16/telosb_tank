@@ -1,7 +1,7 @@
-generic module JoyStickP {
+module JoyStickP {
     provides {
-        interface AdcConfigure<const msp430adc12_channel_config_t*> as AdcConfigure1;
-        interface AdcConfigure<const msp430adc12_channel_config_t*> as AdcConfigure2;
+        interface AdcConfigure<const msp430adc12_channel_config_t*> as AdcConfigureX;
+        interface AdcConfigure<const msp430adc12_channel_config_t*> as AdcConfigureY;
     }
 }
 
@@ -28,11 +28,11 @@ implementation {
         sampcon_id: SAMPCON_CLOCK_DIV_1
     }
 
-    async command const msp430adc12_channel_config_t* AdcConfigure1.getConfiguration() {
+    async command const msp430adc12_channel_config_t* AdcConfigureX.getConfiguration() {
         return &config1;
     }
 
-    async command const msp430adc12_channel_config_t* AdcConfigure2.getConfiguration() {
+    async command const msp430adc12_channel_config_t* AdcConfigureY.getConfiguration() {
         return &config2;
     }
 }
