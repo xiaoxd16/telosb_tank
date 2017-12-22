@@ -15,7 +15,7 @@ implementation {
         sht: SAMPLE_HOLD_4_CYCLES,
         sampcon_ssel: SAMPCON_SOURCE_SMCLK,
         sampcon_id: SAMPCON_CLOCK_DIV_1
-    }
+    };
 
     const msp430adc12_channel_config_t config2 = {
         inch: INPUT_CHANNEL_A7,
@@ -26,7 +26,7 @@ implementation {
         sht: SAMPLE_HOLD_4_CYCLES,
         sampcon_ssel: SAMPCON_SOURCE_SMCLK,
         sampcon_id: SAMPCON_CLOCK_DIV_1
-    }
+    };
 
     async command const msp430adc12_channel_config_t* AdcConfigureX.getConfiguration() {
         return &config1;

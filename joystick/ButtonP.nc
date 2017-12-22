@@ -1,11 +1,11 @@
 module ButtonP {
     uses {
-        interface HplMspGeneralIO as ButtonIOA;
-        interface HplMspGeneralIO as ButtonIOB;
-        interface HplMspGeneralIO as ButtonIOC;
-        interface HplMspGeneralIO as ButtonIOD;
-        interface HplMspGeneralIO as ButtonIOE;
-        interface HplMspGeneralIO as ButtonIOF;
+        interface HplMsp430GeneralIO as ButtonIOA;
+        interface HplMsp430GeneralIO as ButtonIOB;
+        interface HplMsp430GeneralIO as ButtonIOC;
+        interface HplMsp430GeneralIO as ButtonIOD;
+        interface HplMsp430GeneralIO as ButtonIOE;
+        interface HplMsp430GeneralIO as ButtonIOF;
     }
 
     provides {
@@ -33,27 +33,27 @@ implementation {
     }
 
     task void task_getButtonA() {
-        signal Button.getButtonADone(ButtonIOA.get());
+        signal Button.getButtonADone(call ButtonIOA.get());
     }
 
     task void task_getButtonB() {
-        signal Button.getButtonBDone(ButtonIOB.get());
+        signal Button.getButtonBDone(call ButtonIOB.get());
     }
 
     task void task_getButtonC() {
-        signal Button.getButtonCDone(ButtonIOC.get());
+        signal Button.getButtonCDone(call ButtonIOC.get());
     }
 
     task void task_getButtonD() {
-        signal Button.getButtonDDone(ButtonIOD.get());
+        signal Button.getButtonDDone(call ButtonIOD.get());
     }
 
     task void task_getButtonE() {
-        signal Button.getButtonEDone(ButtonIOE.get());
+        signal Button.getButtonEDone(call ButtonIOE.get());
     }
 
     task void task_getButtonF() {
-        signal Button.getButtonFDone(ButtonIOF.get());
+        signal Button.getButtonFDone(call ButtonIOF.get());
     }
 
     command void Button.start() {
@@ -81,6 +81,6 @@ implementation {
     }
 
     command void Button.getButtonF() {
-        post task_getButtonAF();
+        post task_getButtonF();
     }
 }
