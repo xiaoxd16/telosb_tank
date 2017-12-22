@@ -4,8 +4,10 @@
 #define BLINKTORADIO_H
 
 enum {
-    AM_BLINKTORADIO = 6,
-    TIMER_PERIOD_MILLI = 250,
+    AM_JOYSTICKMSG   = 6,
+    AM_INITIALIZEMSG = 7,
+
+    TIMER_PERIOD_MILLI = 100,
 
     JOYSTICK_STOP  = 0,
     JOYSTICK_UP    = 1,
@@ -21,6 +23,12 @@ enum {
 
 typedef nx_struct JoyStickMsg {
     nx_uint16_t JoyStickOp;
+    nx_uint16_t Steer1Angle;
+    nx_uint16_t Steer2Angle;
+    nx_uint16_t Steer3Angle;
+}
+
+typedef nx_struct InitializeMsg {
     nx_uint16_t Steer1Angle;
     nx_uint16_t Steer2Angle;
     nx_uint16_t Steer3Angle;

@@ -8,7 +8,7 @@ implementation {
     components ButtonP;
     components HplMspGeneralIOC as IOC;
 
-    Button = ButtonP.Button;
+    Button = ButtonP;
 
     ButtonP.ButtonIOA -> IOC.Port60;
     ButtonP.ButtonIOB -> IOC.Port21;

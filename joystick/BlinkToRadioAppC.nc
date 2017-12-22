@@ -40,22 +40,27 @@
 #include "../BlinkToRadio.h"
 
 configuration BlinkToRadioAppC {
-}
-implementation {
-  components MainC;
-  components LedsC;
-  components BlinkToRadioC as App;
-  components new TimerMilliC() as Timer0;
-  components ActiveMessageC;
-  components new AMSenderC(AM_BLINKTORADIO);
-  components new AMReceiverC(AM_BLINKTORADIO);
 
-  App.Boot -> MainC;
-  App.Leds -> LedsC;
-  App.Timer0 -> Timer0;
-  App.Packet -> AMSenderC;
-  App.AMPacket -> AMSenderC;
-  App.AMControl -> ActiveMessageC;
-  App.AMSend -> AMSenderC;
-  App.Receive -> AMReceiverC;
+}
+
+implementation {
+    components MainC;
+    components BlinkToRadioC as App;
+    components new TimerMilliC() as Timer;
+    components ActiveMessageC;
+    components new AMSenderC(AM_JOYSTICKMSG) as AMSenderC_1;
+    components new AMSenderC(AM_INITIALIZEMSG) as AMSenderC_2;
+    components ButtonC;
+    components JoyStickC;
+
+    App.Boot -> MainC;
+    App.Timer -> Timer;
+    App.Packet -> AMSenderC;
+    App.AMPacket -> AMSenderC;
+    App.AMControl -> ActiveMessageC;
+    App.AMSendJoystick -> AMSenderC_1;
+    App.AMSendInitialize -> AMSenderC_2;
+    App.Button -> ButtonC;
+    App.ReadJoyStickX -> JoyStickC.ReadJoyStickX;
+    App.ReadJoyStickY -> JoyStickC.ReadJoyStickY;
 }
