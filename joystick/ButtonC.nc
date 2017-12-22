@@ -6,7 +6,7 @@ configuration ButtonC {
 
 implementation {
     components ButtonP;
-    components HplMspGeneralIOC as IOC;
+    components HplMsp430GeneralIOC as IOC;
 
     Button = ButtonP;
 
