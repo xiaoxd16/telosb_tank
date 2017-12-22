@@ -5,7 +5,7 @@ module CarP{
     provides interface Car;
     uses interface Resource;
     uses interface HplMsp430Usart;
-    uses interface HplMsp430UsartInterrupts;
+    //uses interface HplMsp430UsartInterrupts;
 }
 
 implementation{
@@ -13,7 +13,7 @@ implementation{
     enum {
         BUFFER_SIZE = 8,
     };
-    const msp430_uart_union_config_t config = {
+    msp430_uart_union_config_t config = {
         {
             utxe: 1,
             urxe: 1,
@@ -91,7 +91,7 @@ implementation{
     {
         call HplMsp430Usart.setModeUart(&config);
         call HplMsp430Usart.enableUart();
-        U0CTL &= ~SYNC;
+        atomic U0CTL &= ~SYNC;
 
         buffer[2] = current_control_byte;
         buffer[3] = current_data_byte_high;
@@ -118,36 +118,34 @@ implementation{
 
     command uint8_t Car.forward(uint16_t speed)
     {
-        uint8_t low = angle & 0x00FF;
-        uint8_t high = angle >> 8;
+        uint8_t low = speed & 0x00FF;
+        uint8_t high = speed >> 8;
         return pre_send(0x02, high, low);
     }
 
     command uint8_t Car.back(uint16_t speed)
     {
-        uint8_t low = angle & 0x00FF;
-        uint8_t high = angle >> 8;
+        uint8_t low = speed & 0x00FF;
+        uint8_t high = speed >> 8;
         return pre_send(0x03, high, low);
     }
 
     command uint8_t Car.left(uint16_t speed)
     {
-        uint8_t low = angle & 0x00FF;
-        uint8_t high = angle >> 8;
+        uint8_t low = speed & 0x00FF;
+        uint8_t high = speed >> 8;
         return pre_send(0x04, high, low);
     }
 
     command uint8_t Car.right(uint16_t speed)
     {
-        uint8_t low = angle & 0x00FF;
-        uint8_t high = angle >> 8;
+        uint8_t low = speed & 0x00FF;
+        uint8_t high = speed >> 8;
         return pre_send(0x05, high, low);
     }
 
     command uint8_t Car.pause()
     {
-        uint8_t low = angle & 0x00FF;
-        uint8_t high = angle >> 8;
         return pre_send(0x06, 0x00, 0x00);
     }
 }
