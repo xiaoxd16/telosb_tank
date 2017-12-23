@@ -1,3 +1,4 @@
 COMPONENT=BlinkToRadioAppC
+CFLAGS += -I$(TOSDIR)/lib/printf
+CFLAGS += -DNOT_USE_PRINTFC_BUT_USE_PRINT
 include $(MAKERULES)
-

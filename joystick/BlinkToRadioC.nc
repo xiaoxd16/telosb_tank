@@ -27,6 +27,7 @@ implementation {
 
     bool busy = FALSE;
     bool initialSend = FALSE;
+    uint16_t initialCDD = 1;
     uint16_t initialCD = 10;
 
     uint16_t joyX;
@@ -62,12 +63,12 @@ implementation {
     }
 
     event void Timer.fired() {
-        printf("Timer fired |%d|.\n", initialSend);
+        printf("Timer fired |%d %d|.\n", initialSend, initialCDD);
         printfflush();
         call Leds.led0Toggle();
         if (!busy)
         {
-            if (!initialSend) {
+            if (initialCDD > 0) {
                 // reset
                 while (msgInitialize != NULL) {
                     msgInitialize = (InitializeMsg*)(call PacketInitialize.getPayload(&pktInitialize, sizeof(InitializeMsg)));
@@ -80,6 +81,7 @@ implementation {
                     busy = TRUE;
                     printf("Sending initilize package.\n");
                     printfflush();
+                    call Leds.led1Toggle();
                 }
             }
             else {
@@ -147,7 +149,7 @@ implementation {
     event void Button.getButtonFDone(bool isHighPin) {
         btF = isHighPin;
 
-        if (!btA && !btB) {
+        /*(if (!btA && !btB) {
             // reset
             while (msgInitialize != NULL) {
                 msgInitialize = (InitializeMsg*)(call PacketInitialize.getPayload(&pktInitialize, sizeof(InitializeMsg)));
@@ -158,9 +160,10 @@ implementation {
             if (call AMSendInitialize.send(CAR_ID, &pktInitialize, sizeof(InitializeMsg)) == SUCCESS) {
                 initialCD = 10;
                 busy = TRUE;
+                call Leds.led1Toggle();
             }
             return;
-        }
+        }*/
 
         if (btA ^ btB) {
             if (!btA) {
@@ -226,6 +229,7 @@ implementation {
             printf("Sending joystick package.\n");
             printf("Data: joyX=%u, joyY=%u, btA=%u, btB=%u, btC=%u, btD=%u, btE=%u, btF=%u.\n", joyX, joyY, btA, btB, btC, btD, btE, btF);
             printfflush();
+            call Leds.led2Toggle();
         }
     }
 
@@ -235,6 +239,7 @@ implementation {
             busy = FALSE;
             printf("Sending joystick package success.\n");
             printfflush();
+            call Leds.led2Toggle();
         }
     }
 
@@ -243,8 +248,10 @@ implementation {
         if (&pktInitialize == msg) {
             busy = FALSE;
             initialSend = TRUE;
+            --initialCDD;
             printf("Sending initilize package success.\n");
             printfflush();
+            call Leds.led1Toggle();
         }
     }
 }

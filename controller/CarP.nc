@@ -45,6 +45,11 @@ implementation{
 
     void send_buffer()
     {
+        if (bufferPos == 2)
+        {
+            printf("buffer pos = %u bf = %x.\n", bufferPos, buffer[bufferPos]);
+            printfflush();
+        }
         call HplMsp430Usart.tx(buffer[bufferPos]);
         while(!(call HplMsp430Usart.isTxEmpty()));
         bufferPos += 1;
@@ -57,7 +62,7 @@ implementation{
         {
             send_buffer();
         }
-        bufferPos  =  0;
+        bufferPos = 0;
     }
 
     void set_header_and_trailer()
@@ -87,8 +92,15 @@ implementation{
         return call Resource.request();
     }
 
+    task void task_senddone()
+    {
+        signal Car.send_done();
+    }
+
     event void Resource.granted()
     {
+        //printf("into task send.\n");
+        //printfflush();
         call HplMsp430Usart.setModeUart(&config);
         call HplMsp430Usart.enableUart();
         atomic U0CTL &= ~SYNC;
@@ -102,7 +114,9 @@ implementation{
         call Resource.release();
         busy = 0;
 
-        signal Car.send_done();
+        //printf("outof task send.\n");
+        //printfflush();
+        post task_senddone();
     }
 
     command uint8_t Car.turn(uint8_t number, uint16_t angle)
@@ -115,7 +129,6 @@ implementation{
             return pre_send(0x07, high, low);
         else if(number == 2)
             return pre_send(0x08, high, low);
-
     }
 
     command uint8_t Car.forward(uint16_t speed)

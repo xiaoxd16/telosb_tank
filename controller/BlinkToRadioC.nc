@@ -1,6 +1,7 @@
 
 #include <Timer.h>
 #include "../BlinkToRadio.h"
+#include "printf.h"
 
 module BlinkToRadioC {
     uses interface Boot;
@@ -91,15 +92,15 @@ implementation {
                 uint8_t updated = 0;
                 if(current_instruction_pos == 1)
                 {
-                    updated = update_angle(1, current_joystick_msg.Steer1Status);
+                    updated = update_angle(0, current_joystick_msg.Steer1Status);
                 }
                 else if(current_instruction_pos == 2)
                 {
-                    updated = update_angle(2, current_joystick_msg.Steer2Status);
+                    updated = update_angle(1, current_joystick_msg.Steer2Status);
                 }
                 else if(current_instruction_pos == 3)
                 {
-                    updated = update_angle(3, current_joystick_msg.Steer3Status);
+                    updated = update_angle(2, current_joystick_msg.Steer3Status);
                 }
 
                 if(updated == 1)
@@ -117,12 +118,23 @@ implementation {
         }
         else if(current_instruction_num == INITIALIZE_INSTRUCTION)
         {
+            printf("init pos = %u.\n", current_instruction_pos);
+            //printfflush();
             if(current_instruction_pos == 0)
-                call Car.turn(1, current_initialize_msg.Steer1Angle);
+            {
+                steer_angles[0] = current_initialize_msg.Steer1Angle;
+                call Car.turn(0, current_initialize_msg.Steer1Angle);
+            }
             else if(current_instruction_pos == 1)
-                call Car.turn(2, current_initialize_msg.Steer2Angle);
+            {
+                steer_angles[1] = current_initialize_msg.Steer2Angle;
+                call Car.turn(1, current_initialize_msg.Steer2Angle);
+            }
             else if(current_instruction_pos == 2)
-                call Car.turn(3, current_initialize_msg.Steer3Angle);
+            {
+                steer_angles[2] = current_initialize_msg.Steer3Angle;
+                call Car.turn(2, current_initialize_msg.Steer3Angle);
+            }
         }
     }
 
@@ -130,6 +142,7 @@ implementation {
     {
         if(error == SUCCESS)
         {
+            call Timer.startPeriodic(TIMER_PERIOD_MILLI);
         }
         else
         {
@@ -149,20 +162,38 @@ implementation {
 
     event void Timer.fired()
     {
-
+        //printf("leds toggle %d.\n", TOS_NODE_ID);
+        //printfflush();
+        call Leds.led0Toggle();
     }
 
     event void Car.send_done()
     {
+        printf("d=%u %u.\n", current_instruction_pos, current_instruction_num);
+        //printfflush();
         current_instruction_pos += 1;
         if(current_instruction_num == JOYSTICK_INSTRUCTION
             && current_instruction_pos == 4)
-            after_message_processed();
+            {
+                //printf("choose1\n");
+                //printfflush();
+                after_message_processed();
+            }
         else if(current_instruction_num == INITIALIZE_INSTRUCTION
             && current_instruction_pos == 3)
-            after_message_processed();
+            {
+                //printf("choose2\n");
+                //printfflush();
+                after_message_processed();
+            }
+
         else
+        {
+            //printf("choose3\n");
+            //printfflush();
             send_joystick_instruction();
+        }
+
     }
 
     event message_t* JoyStickReceive.receive(message_t* msg, void* payload, uint8_t len)
@@ -173,6 +204,9 @@ implementation {
         {
             return NULL;
         }
+
+        //printf("Receive joystick status = %u.\n", current_instruction_num);
+        //printfflush();
 
         rcvPayload = (JoyStickMsg*)payload;
         if(current_instruction_num == NO_INSTRUCTION)
@@ -186,9 +220,16 @@ implementation {
             }
 
             op = rcvPayload->JoyStickOp;
-            send_control_instruction();
+            //printf("JoyStickOp = %u\n", op);
+            //printfflush();
+            send_control_instruction(op);
+            //printf("Send control done.\n");
+            //printfflush();
         }
         // todo;
+        call Leds.led2Toggle();
+        //printf("Deal joystick.\n");
+        //printfflush();
         return msg;
     }
 
@@ -199,6 +240,10 @@ implementation {
         {
             return NULL;
         }
+
+        printf("Receive init status = %u.\n", current_instruction_num);
+        //printfflush();
+
         rcvPayload = (InitializeMsg*) payload;
         if(current_instruction_num == NO_INSTRUCTION)
         {
@@ -211,6 +256,9 @@ implementation {
 
             send_joystick_instruction();
         }
+        call Leds.led1Toggle();
+        //printf("Deal init.\n");
+        //printfflush();
         return msg;
     }
 }
