@@ -33,8 +33,8 @@ implementation {
     uint16_t steer_angles[3] = {0, 0, 0};
 
     // return:
-    // 0 -- if the angle is changed
-    // 1 -- if the angle is not changed(so no need to send an instruction)
+    // 1 -- if the angle is changed
+    // 0 -- if the angle is not changed(so no need to send an instruction)
     uint8_t update_angle(uint8_t num, nx_uint16_t status)
     {
         uint16_t temp = steer_angles[num];
@@ -58,6 +58,7 @@ implementation {
         {
             return 0;
         }
+        return 0;
     }
 
     void after_message_processed()
@@ -186,7 +187,7 @@ implementation {
             }
 
             op = rcvPayload->JoyStickOp;
-            send_control_instruction();
+            send_control_instruction(op);
         }
         // todo;
         return msg;
