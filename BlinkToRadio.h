@@ -5,7 +5,7 @@ enum {
     AM_JOYSTICKMSG   = 6,
     AM_INITIALIZEMSG = 7,
 
-    TIMER_PERIOD_MILLI = 100,
+    TIMER_PERIOD_MILLI = 1000,
 
     JOYSTICK_STOP  = 0,
     JOYSTICK_UP    = 1,
@@ -13,15 +13,15 @@ enum {
     JOYSTICK_LEFT  = 3,
     JOYSTICK_RIGHT = 4,
 
-    STEER_ANGLE_NOOP    = 0,
     STEER_ANGLE_MIN     = 1800,
     STEER_ANGLE_DEFAULT = 3000,
     STEER_ANGLE_MAX     = 5000,
 
     STEER_ANGLE_DELTA   = 100,
 
-    STEER_TURN_DOWN = 0,
-    STEER_TURN_UP   = 1,
+    STEER_TURN_NOOP = 0,
+    STEER_TURN_DOWN = 1,
+    STEER_TURN_UP   = 2,
 
     CAR_ID = 9
 };
