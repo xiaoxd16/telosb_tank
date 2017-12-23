@@ -1,4 +1,3 @@
-
 #include <Timer.h>
 #include "../BlinkToRadio.h"
 #include "printf.h"
@@ -7,6 +6,7 @@ module BlinkToRadioC {
     uses interface Boot;
     uses interface Leds;
     uses interface Timer<TMilli> as Timer;
+    uses interface Timer<TMilli> as TimerAuto;
     uses interface Packet;
     uses interface Receive as JoyStickReceive;
     uses interface Receive as InitializeReceive;
@@ -21,6 +21,7 @@ implementation {
     uint16_t steer_angles[3] = {3000, 3000, 3000};
     uint16_t cur_command = 0;
     uint16_t do_op[4] = {0, 0, 0, 0};
+    uint16_t auto_test = 0;
 
     void reset()
     {
@@ -85,6 +86,7 @@ implementation {
         if(error == SUCCESS)
         {
             call Timer.startPeriodic(TIMER_LED_MILLI);
+            call TimerAuto.startPeriodic(TIMER_LED_AUTO);
         }
         else
         {
@@ -102,6 +104,75 @@ implementation {
         call AMControl.start();
     }
 
+    event void TimerAuto.fired()
+    {
+        if (auto_test >= 20)
+        {
+            return;
+        }
+        ++auto_test;
+        if (auto_test == 2)
+        {
+            car_op = JOYSTICK_UP;
+            call Car.forward(500);
+        }
+        else if (auto_test == 4)
+        {
+            car_op = JOYSTICK_DOWN;
+            call Car.back(500);
+        }
+        else if (auto_test == 5)
+        {
+            car_op = JOYSTICK_LEFT;
+            call Car.left(500);
+        }
+        else if (auto_test == 6)
+        {
+            car_op = JOYSTICK_RIGHT;
+            call Car.right(500);
+        }
+        else if (auto_test == 7)
+        {
+            car_op = JOYSTICK_STOP;
+            call Car.pause();
+        }
+        else if (auto_test == 8)
+        {
+            do_op[1] = 1;
+            do_op[2] = 0;
+            do_op[3] = 0;
+            call Car.turn(0, STEER_ANGLE_MIN);
+        }
+        else if (auto_test == 9)
+        {
+            do_op[1] = 1;
+            do_op[2] = 0;
+            do_op[3] = 0;
+            call Car.turn(0, STEER_ANGLE_MAX);
+        }
+        else if (auto_test == 10)
+        {
+            do_op[1] = 0;
+            do_op[2] = 1;
+            do_op[3] = 0;
+            call Car.turn(1, STEER_ANGLE_MIN);
+        }
+        else if (auto_test == 11)
+        {
+            do_op[1] = 0;
+            do_op[2] = 1;
+            do_op[3] = 0;
+            call Car.turn(1, STEER_ANGLE_MAX);
+        }
+        else if (auto_test == 12)
+        {
+            do_op[1] = 1;
+            do_op[2] = 1;
+            do_op[3] = 1;
+            call Car.turn(0, STEER_ANGLE_DEFAULT);
+            call Car.turn(1, STEER_ANGLE_DEFAULT);
+        }
+    }
     event void Timer.fired()
     {
         if (do_op[1] + do_op[2] + do_op[3] == 3)
@@ -175,7 +246,7 @@ implementation {
         {
             return msg;
         }
-        if (busy) return msg;
+        if (busy || auto_test < 12) return msg;
 
         rcvPayload = (JoyStickMsg*)payload;
         busy = TRUE;
@@ -228,7 +299,7 @@ implementation {
         {
             return msg;
         }
-        if (busy) return msg;
+        if (busy || auto_test <= 12) return msg;
 
         rcvPayload = (InitializeMsg*) payload;
         busy = TRUE;

@@ -7,6 +7,7 @@ enum {
 
     TIMER_PERIOD_MILLI = 50,
     TIMER_LED_MILLI = 100,
+    TIMER_LED_AUTO = 2000,
 
     JOYSTICK_STOP  = 0,
     JOYSTICK_UP    = 1,
