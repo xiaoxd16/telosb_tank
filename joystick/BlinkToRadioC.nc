@@ -27,7 +27,6 @@ implementation {
 
     bool busy = FALSE;
     bool initialSend = FALSE;
-    uint16_t initialCDD = 1;
     uint16_t initialCD = 10;
 
     uint16_t joyX;
@@ -63,19 +62,21 @@ implementation {
     }
 
     event void Timer.fired() {
-        printf("Timer fired |%d %d|.\n", initialSend, initialCDD);
+        printf("Timer fired |%d|.\n", initialSend);
         printfflush();
         call Leds.led0Toggle();
         if (!busy)
         {
-            if (initialCDD > 0) {
+            if (!initialSend) {
                 // reset
-                while (msgInitialize != NULL) {
+                do {
                     msgInitialize = (InitializeMsg*)(call PacketInitialize.getPayload(&pktInitialize, sizeof(InitializeMsg)));
-                }
+                } while (msgInitialize == NULL);
+                printf("angle=%u %u %u %u.\n", msgInitialize->Steer1Angle, msgInitialize->Steer2Angle, msgInitialize->Steer3Angle, STEER_ANGLE_DEFAULT);
                 msgInitialize->Steer1Angle = STEER_ANGLE_DEFAULT;
                 msgInitialize->Steer2Angle = STEER_ANGLE_DEFAULT;
                 msgInitialize->Steer3Angle = STEER_ANGLE_DEFAULT;
+                printf("angle=%u %u %u %u.\n", msgInitialize->Steer1Angle, msgInitialize->Steer2Angle, msgInitialize->Steer3Angle, STEER_ANGLE_DEFAULT);
                 if (call AMSendInitialize.send(CAR_ID, &pktInitialize, sizeof(InitializeMsg)) == SUCCESS) {
                     initialCD = 10;
                     busy = TRUE;
@@ -148,12 +149,13 @@ implementation {
 
     event void Button.getButtonFDone(bool isHighPin) {
         btF = isHighPin;
+        //btA = 1 - btA;
 
-        /*(if (!btA && !btB) {
+        if (!btA && !btB) {
             // reset
-            while (msgInitialize != NULL) {
+            do {
                 msgInitialize = (InitializeMsg*)(call PacketInitialize.getPayload(&pktInitialize, sizeof(InitializeMsg)));
-            }
+            } while (msgInitialize == NULL);
             msgInitialize->Steer1Angle = STEER_ANGLE_DEFAULT;
             msgInitialize->Steer2Angle = STEER_ANGLE_DEFAULT;
             msgInitialize->Steer3Angle = STEER_ANGLE_DEFAULT;
@@ -163,7 +165,7 @@ implementation {
                 call Leds.led1Toggle();
             }
             return;
-        }*/
+        }
 
         if (btA ^ btB) {
             if (!btA) {
@@ -177,8 +179,8 @@ implementation {
             msgJoystick->Steer1Status = STEER_TURN_NOOP;
         }
 
-        if (btC ^ btD) {
-            if (!btC) {
+        if (btE ^ btF) {
+            if (!btE) {
                 msgJoystick->Steer2Status = STEER_TURN_DOWN;
             }
             else {
@@ -189,8 +191,8 @@ implementation {
             msgJoystick->Steer2Status = STEER_TURN_NOOP;
         }
 
-        if (btE ^ btF) {
-            if (!btE) {
+        if (btC ^ btD) {
+            if (!btC) {
                 msgJoystick->Steer3Status = STEER_TURN_DOWN;
             }
             else {
@@ -206,10 +208,10 @@ implementation {
                 msgJoystick->JoyStickOp = JOYSTICK_STOP;
             }
             else if (joyX + joyY >= 0x1000) {
-                msgJoystick->JoyStickOp = JOYSTICK_LEFT;
+                msgJoystick->JoyStickOp = JOYSTICK_DOWN;
             }
             else {
-                msgJoystick->JoyStickOp = JOYSTICK_UP;
+                msgJoystick->JoyStickOp = JOYSTICK_LEFT;
             }
         }
         else {
@@ -217,17 +219,19 @@ implementation {
                 msgJoystick->JoyStickOp = JOYSTICK_STOP;
             }
             else if (joyX + joyY >= 0x1000) {
-                msgJoystick->JoyStickOp = JOYSTICK_DOWN;
-            }
-            else {
                 msgJoystick->JoyStickOp = JOYSTICK_RIGHT;
             }
+            else {
+                msgJoystick->JoyStickOp = JOYSTICK_UP;
+            }
         }
+
+        printf("Data: %u %u %u %u.\n",msgJoystick->JoyStickOp, msgJoystick->Steer1Status, msgJoystick->Steer2Status, msgJoystick->Steer3Status);
+        printf("Data: %u %u %u %u %u %u.\n", btA, btB, btC, btD, btE, btF);
 
         if (call AMSendJoystick.send(CAR_ID, &pktJoystick, sizeof(JoyStickMsg)) == SUCCESS) {
             busy = TRUE;
             printf("Sending joystick package.\n");
-            printf("Data: joyX=%u, joyY=%u, btA=%u, btB=%u, btC=%u, btD=%u, btE=%u, btF=%u.\n", joyX, joyY, btA, btB, btC, btD, btE, btF);
             printfflush();
             call Leds.led2Toggle();
         }
@@ -248,7 +252,6 @@ implementation {
         if (&pktInitialize == msg) {
             busy = FALSE;
             initialSend = TRUE;
-            --initialCDD;
             printf("Sending initilize package success.\n");
             printfflush();
             call Leds.led1Toggle();

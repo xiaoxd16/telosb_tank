@@ -21,8 +21,8 @@ implementation {
         INITIALIZE_INSTRUCTION = 2,
     };
     enum {
-        TIME_PERIOD = 100;
-    }
+        TIME_PERIOD = 100,
+    };
     enum {
         STATE_STOP = 0,
         STATE_UP = 1,
@@ -30,7 +30,7 @@ implementation {
         STATE_LEFT = 3,
         STATE_RIGHT = 4,
         STATE_NOOP = 5
-    }
+    };
     // which type of instruction is now being send?
     uint8_t current_instruction_num = NO_INSTRUCTION;
 
@@ -42,7 +42,7 @@ implementation {
     nx_struct JoyStickMsg current_joystick_msg;
     nx_struct InitializeMsg current_initialize_msg;
 
-    uint16_t steer_angles[3] = {0, 0, 0};
+    uint16_t steer_angles[3] = {3000, 3000, 3000};
 
     uint8_t led_status = STATE_NOOP;
     uint8_t status_just_changed = 0;
@@ -86,6 +86,7 @@ implementation {
 
     void send_control_instruction(nx_uint16_t op)
     {
+        printf("send instruction.\n");
         if(op == JOYSTICK_STOP)
             call Car.pause();
         else if(op == JOYSTICK_UP)
@@ -122,8 +123,8 @@ implementation {
 
                 if(updated == 1)
                 {
-                    call Car.turn(current_instruction_pos,
-                                  steer_angles[current_instruction_pos]);
+                    call Car.turn(current_instruction_pos - 1,
+                                  steer_angles[current_instruction_pos - 1]);
                     break;
                 }
                 current_instruction_pos += 1;
@@ -135,7 +136,7 @@ implementation {
         }
         else if(current_instruction_num == INITIALIZE_INSTRUCTION)
         {
-            printf("init pos = %u.\n", current_instruction_pos);
+            printf("init pos = %u %u.\n", current_instruction_pos, current_initialize_msg.Steer1Angle);
             //printfflush();
             if(current_instruction_pos == 0)
             {
@@ -179,6 +180,7 @@ implementation {
 
     event void Timer.fired()
     {
+        return;
         if(current_instruction_num != NO_INSTRUCTION)
             return;
         if(led_status == STATE_NOOP)
@@ -217,7 +219,6 @@ implementation {
                 call Leds.led2Toggle();
             }
         }
-
     }
 
     event void Car.send_done()
@@ -258,7 +259,8 @@ implementation {
             return NULL;
         }
 
-        //printf("Receive joystick status = %u.\n", current_instruction_num);
+        printf("Receive joystick status = %u.\n", current_instruction_num);
+        printf("angle = %u %u %u.\n", steer_angles[0], steer_angles[1], steer_angles[2]);
         //printfflush();
 
         rcvPayload = (JoyStickMsg*)payload;
@@ -294,10 +296,11 @@ implementation {
             return NULL;
         }
 
-        printf("Receive init status = %u.\n", current_instruction_num);
+        //printf("Receive init status = %u.\n", current_instruction_num);
         //printfflush();
 
         rcvPayload = (InitializeMsg*) payload;
+        //printf("angle = %u %u %u.\n", rcvPayload->Steer1Angle, rcvPayload->Steer2Angle, rcvPayload->Steer3Angle);
         if(current_instruction_num == NO_INSTRUCTION)
         {
             current_instruction_num = INITIALIZE_INSTRUCTION;
