@@ -246,7 +246,7 @@ implementation {
         {
             return msg;
         }
-        if (busy || auto_test < 12) return msg;
+        if (busy || auto_test <= 12) return msg;
 
         rcvPayload = (JoyStickMsg*)payload;
         busy = TRUE;
