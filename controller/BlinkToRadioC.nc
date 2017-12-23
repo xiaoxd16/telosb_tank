@@ -122,7 +122,7 @@ implementation {
             else if(current_instruction_pos == 1)
                 call Car.turn(2, current_initialize_msg.Steer2Angle);
             else if(current_instruction_pos == 2)
-                call Car.turn(3, current_initialize_msg.Steer2Angle);
+                call Car.turn(3, current_initialize_msg.Steer3Angle);
         }
     }
 
