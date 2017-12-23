@@ -18,4 +18,6 @@ implementation {
     BlinkToRadioC.InitializeReceive -> InitializeReceiver.Receive;
     BlinkToRadioC.AMControl -> ActiveMessageC.SplitControl;
     BlinkToRadioC.Packet -> ActiveMessageC.Packet;
+
+    BlinkToRadioC.Car -> CarC.Car;
 }

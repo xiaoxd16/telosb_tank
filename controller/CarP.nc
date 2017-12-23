@@ -101,6 +101,8 @@ implementation{
 
         call Resource.release();
         busy = 0;
+
+        signal Car.send_done();
     }
 
     command uint8_t Car.turn(uint8_t number, uint16_t angle)

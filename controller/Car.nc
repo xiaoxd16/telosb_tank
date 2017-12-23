@@ -8,5 +8,6 @@ interface Car
     command uint8_t left(uint16_t speed);
     command uint8_t right(uint16_t speed);
     command uint8_t pause();
-}
 
+    event void send_done();
+}
