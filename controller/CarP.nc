@@ -45,11 +45,7 @@ implementation{
 
     void send_buffer()
     {
-        if (bufferPos == 2)
-        {
-            printf("buffer pos = %u bf = %x.\n", bufferPos, buffer[bufferPos]);
-            printfflush();
-        }
+        while(!(call HplMsp430Usart.isTxEmpty()));
         call HplMsp430Usart.tx(buffer[bufferPos]);
         while(!(call HplMsp430Usart.isTxEmpty()));
         bufferPos += 1;
@@ -99,8 +95,6 @@ implementation{
 
     event void Resource.granted()
     {
-        //printf("into task send.\n");
-        //printfflush();
         call HplMsp430Usart.setModeUart(&config);
         call HplMsp430Usart.enableUart();
         atomic U0CTL &= ~SYNC;
@@ -114,8 +108,6 @@ implementation{
         call Resource.release();
         busy = 0;
 
-        //printf("outof task send.\n");
-        //printfflush();
         post task_senddone();
     }
 

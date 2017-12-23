@@ -40,8 +40,6 @@ implementation {
 
     event void Boot.booted() {
         call AMControl.start();
-        printf("AMControl start.\n");
-        printfflush();
     }
 
     event void AMControl.startDone(error_t err) {
@@ -62,8 +60,6 @@ implementation {
     }
 
     event void Timer.fired() {
-        printf("Timer fired |%d|.\n", initialSend);
-        printfflush();
         call Leds.led0Toggle();
         if (!busy)
         {
@@ -72,16 +68,12 @@ implementation {
                 do {
                     msgInitialize = (InitializeMsg*)(call PacketInitialize.getPayload(&pktInitialize, sizeof(InitializeMsg)));
                 } while (msgInitialize == NULL);
-                printf("angle=%u %u %u %u.\n", msgInitialize->Steer1Angle, msgInitialize->Steer2Angle, msgInitialize->Steer3Angle, STEER_ANGLE_DEFAULT);
                 msgInitialize->Steer1Angle = STEER_ANGLE_DEFAULT;
                 msgInitialize->Steer2Angle = STEER_ANGLE_DEFAULT;
                 msgInitialize->Steer3Angle = STEER_ANGLE_DEFAULT;
-                printf("angle=%u %u %u %u.\n", msgInitialize->Steer1Angle, msgInitialize->Steer2Angle, msgInitialize->Steer3Angle, STEER_ANGLE_DEFAULT);
                 if (call AMSendInitialize.send(CAR_ID, &pktInitialize, sizeof(InitializeMsg)) == SUCCESS) {
                     initialCD = 10;
                     busy = TRUE;
-                    printf("Sending initilize package.\n");
-                    printfflush();
                     call Leds.led1Toggle();
                 }
             }
@@ -138,7 +130,7 @@ implementation {
     }
 
     event void Button.getButtonDDone(bool isHighPin) {
-        btD = isHighPin;
+        btD = 1 - isHighPin;
         call Button.getButtonE();
     }
 
@@ -149,7 +141,7 @@ implementation {
 
     event void Button.getButtonFDone(bool isHighPin) {
         btF = isHighPin;
-        //btA = 1 - btA;
+        //printf("%u %u %u %u %u %u.\n", btA, btB, btC, btD, btE, btF);
 
         if (!btA && !btB) {
             // reset
@@ -226,13 +218,8 @@ implementation {
             }
         }
 
-        printf("Data: %u %u %u %u.\n",msgJoystick->JoyStickOp, msgJoystick->Steer1Status, msgJoystick->Steer2Status, msgJoystick->Steer3Status);
-        printf("Data: %u %u %u %u %u %u.\n", btA, btB, btC, btD, btE, btF);
-
         if (call AMSendJoystick.send(CAR_ID, &pktJoystick, sizeof(JoyStickMsg)) == SUCCESS) {
             busy = TRUE;
-            printf("Sending joystick package.\n");
-            printfflush();
             call Leds.led2Toggle();
         }
     }
@@ -241,8 +228,6 @@ implementation {
     {
         if (&pktJoystick == msg) {
             busy = FALSE;
-            printf("Sending joystick package success.\n");
-            printfflush();
             call Leds.led2Toggle();
         }
     }
@@ -252,8 +237,6 @@ implementation {
         if (&pktInitialize == msg) {
             busy = FALSE;
             initialSend = TRUE;
-            printf("Sending initilize package success.\n");
-            printfflush();
             call Leds.led1Toggle();
         }
     }
