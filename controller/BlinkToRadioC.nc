@@ -19,6 +19,17 @@ implementation {
         JOYSTICK_INSTRUCTION = 1,
         INITIALIZE_INSTRUCTION = 2,
     };
+    enum {
+        TIME_PERIOD = 100;
+    }
+    enum {
+        STATE_STOP = 0,
+        STATE_UP = 1,
+        STATE_DOWN = 2,
+        STATE_LEFT = 3,
+        STATE_RIGHT = 4,
+        STATE_NOOP = 5
+    }
     // which type of instruction is now being send?
     uint8_t current_instruction_num = NO_INSTRUCTION;
 
@@ -31,6 +42,9 @@ implementation {
     nx_struct InitializeMsg current_initialize_msg;
 
     uint16_t steer_angles[3] = {0, 0, 0};
+
+    uint8_t led_status = STATE_NOOP;
+    uint8_t status_just_changed = 0;
 
     // return:
     // 1 -- if the angle is changed
@@ -81,6 +95,8 @@ implementation {
             call Car.left(500);
         else if(op == JOYSTICK_RIGHT)
             call Car.right(500);
+        led_status = op;
+        status_just_changed = 1;
     }
 
     void send_joystick_instruction()
@@ -150,6 +166,44 @@ implementation {
 
     event void Timer.fired()
     {
+        if(current_instruction_num != NO_INSTRUCTION)
+            return;
+        if(led_status == STATE_NOOP)
+            return;
+        else if(led_status == STATE_LEFT)
+            call Leds.led0Toggle();
+        else if(led_status == STATE_RIGHT)
+            call Leds.led2Toggle();
+        else if(led_status == STATE_UP)
+        {
+            if(status_just_changed == 1)
+            {
+                call Leds.led0On();
+                call Leds.led1On();
+                call Leds.led0Off();
+                status_just_changed = 0;
+            }
+            else
+            {
+                call Leds.led0Toggle();
+                call Leds.led2Toggle();
+            }
+        }
+        else if(led_status == STATE_DOWN)
+        {
+            if(status_just_changed == 1)
+            {
+                call Leds.led0On();
+                call Leds.led1Off();
+                call Leds.led2On();
+                status_just_changed = 0;
+            }
+            else
+            {
+                call Leds.led0Toggle();
+                call Leds.led2Toggle();
+            }
+        }
 
     }
 
