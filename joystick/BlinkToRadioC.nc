@@ -14,6 +14,8 @@ module BlinkToRadioC {
     uses interface Button;
     uses interface Read<uint16_t> as ReadJoyStickX;
     uses interface Read<uint16_t> as ReadJoyStickY;
+
+    uses interface Leds;
 }
 
 implementation {
@@ -38,6 +40,8 @@ implementation {
 
     event void Boot.booted() {
         call AMControl.start();
+        printf("AMControl start.\n");
+        printfflush();
     }
 
     event void AMControl.startDone(error_t err) {
@@ -58,6 +62,9 @@ implementation {
     }
 
     event void Timer.fired() {
+        printf("Timer fired |%d|.\n", initialSend);
+        printfflush();
+        call Leds.led0Toggle();
         if (!busy)
         {
             if (!initialSend) {
@@ -72,6 +79,7 @@ implementation {
                     initialCD = 10;
                     busy = TRUE;
                     printf("Sending initilize package.\n");
+                    printfflush();
                 }
             }
             else {
@@ -158,30 +166,36 @@ implementation {
             if (!btA) {
                 msgJoystick->Steer1Status = STEER_TURN_DOWN;
             }
-            else
-            {
+            else {
                 msgJoystick->Steer1Status = STEER_TURN_UP;
             }
+        }
+        else {
+            msgJoystick->Steer1Status = STEER_TURN_NOOP;
         }
 
         if (btC ^ btD) {
             if (!btC) {
                 msgJoystick->Steer2Status = STEER_TURN_DOWN;
             }
-            else
-            {
+            else {
                 msgJoystick->Steer2Status = STEER_TURN_UP;
             }
+        }
+        else {
+            msgJoystick->Steer2Status = STEER_TURN_NOOP;
         }
 
         if (btE ^ btF) {
             if (!btE) {
                 msgJoystick->Steer3Status = STEER_TURN_DOWN;
             }
-            else
-            {
+            else {
                 msgJoystick->Steer3Status = STEER_TURN_UP;
             }
+        }
+        else {
+            msgJoystick->Steer3Status = STEER_TURN_NOOP;
         }
 
         if (joyX > joyY) {
@@ -211,6 +225,7 @@ implementation {
             busy = TRUE;
             printf("Sending joystick package.\n");
             printf("Data: joyX=%u, joyY=%u, btA=%u, btB=%u, btC=%u, btD=%u, btE=%u, btF=%u.\n", joyX, joyY, btA, btB, btC, btD, btE, btF);
+            printfflush();
         }
     }
 
@@ -219,6 +234,7 @@ implementation {
         if (&pktJoystick == msg) {
             busy = FALSE;
             printf("Sending joystick package success.\n");
+            printfflush();
         }
     }
 
@@ -228,6 +244,7 @@ implementation {
             busy = FALSE;
             initialSend = TRUE;
             printf("Sending initilize package success.\n");
+            printfflush();
         }
     }
 }

@@ -15,6 +15,8 @@ implementation {
     components ButtonC;
     components JoyStickC;
 
+    components LedsC;
+
     App.Boot -> MainC;
     App.Timer -> Timer;
     App.PacketJoystick -> AMSenderC_1;
@@ -25,4 +27,6 @@ implementation {
     App.Button -> ButtonC;
     App.ReadJoyStickX -> JoyStickC.ReadJoyStickX;
     App.ReadJoyStickY -> JoyStickC.ReadJoyStickY;
+
+    App.Leds -> LedsC;
 }
