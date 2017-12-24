@@ -16,6 +16,7 @@ module BlinkToRadioC {
 }
 implementation {
     bool busy = FALSE;
+    bool auto_last = FALSE;
 
     uint16_t car_op = JOYSTICK_STOP;
     uint16_t steer_angles[3] = {3000, 3000, 3000};
@@ -52,7 +53,7 @@ implementation {
             reset();
             return;
         }
-        printf("cur_command = %u %u %u.\n", cur_command, car_op, do_op[0]);
+        // printf("cur_command = %u %u %u.\n", cur_command, car_op, do_op[0]);
 
         if (cur_command == 0)
         {
@@ -106,15 +107,20 @@ implementation {
 
     event void TimerAuto.fired()
     {
-        if (auto_test >= 20)
+        if (auto_test >= 15)
         {
             return;
         }
         ++auto_test;
         if (auto_test == 2)
         {
-            car_op = JOYSTICK_UP;
-            call Car.forward(500);
+            car_op = JOYSTICK_LEFT;
+            call Car.left(500);
+        }
+        else if (auto_test == 3)
+        {
+            car_op = JOYSTICK_RIGHT;
+            call Car.right(500);
         }
         else if (auto_test == 4)
         {
@@ -123,54 +129,48 @@ implementation {
         }
         else if (auto_test == 5)
         {
-            car_op = JOYSTICK_LEFT;
-            call Car.left(500);
+            car_op = JOYSTICK_UP;
+            call Car.forward(500);
         }
         else if (auto_test == 6)
-        {
-            car_op = JOYSTICK_RIGHT;
-            call Car.right(500);
-        }
-        else if (auto_test == 7)
         {
             car_op = JOYSTICK_STOP;
             call Car.pause();
         }
-        else if (auto_test == 8)
+        else if (auto_test == 7)
         {
             do_op[1] = 1;
             do_op[2] = 0;
             do_op[3] = 0;
             call Car.turn(0, STEER_ANGLE_MIN);
         }
-        else if (auto_test == 9)
+        else if (auto_test == 8)
         {
             do_op[1] = 1;
             do_op[2] = 0;
             do_op[3] = 0;
             call Car.turn(0, STEER_ANGLE_MAX);
         }
-        else if (auto_test == 10)
+        else if (auto_test == 9)
         {
             do_op[1] = 0;
             do_op[2] = 1;
             do_op[3] = 0;
             call Car.turn(1, STEER_ANGLE_MIN);
         }
-        else if (auto_test == 11)
+        else if (auto_test == 10)
         {
             do_op[1] = 0;
             do_op[2] = 1;
             do_op[3] = 0;
             call Car.turn(1, STEER_ANGLE_MAX);
         }
-        else if (auto_test == 12)
+        else if (auto_test == 11)
         {
             do_op[1] = 1;
             do_op[2] = 1;
             do_op[3] = 1;
             call Car.turn(0, STEER_ANGLE_DEFAULT);
-            call Car.turn(1, STEER_ANGLE_DEFAULT);
         }
     }
     event void Timer.fired()
@@ -207,15 +207,15 @@ implementation {
         }
         else if (car_op == JOYSTICK_UP)
         {
-            call Leds.led0Toggle();
-            call Leds.led1Off();
-            call Leds.led2Off();
-        }
-        else if (car_op == JOYSTICK_DOWN)
-        {
             call Leds.led0Off();
             call Leds.led1Off();
             call Leds.led2Toggle();
+        }
+        else if (car_op == JOYSTICK_DOWN)
+        {
+            call Leds.led0Toggle();
+            call Leds.led1Off();
+            call Leds.led2Off();
         }
         else
         {
@@ -227,6 +227,20 @@ implementation {
 
     event void Car.send_done()
     {
+        printf("auto = %u %u.\n", auto_test, auto_last);
+        printfflush();
+        if (auto_test <= 12)
+        {
+            if (auto_test == 11 && !auto_last)
+            {
+                auto_last = TRUE;
+                printf("call.\n");
+                printfflush();
+                call Car.turn(1, STEER_ANGLE_DEFAULT);
+            }
+            return;
+        }
+
         ++cur_command;
         if (cur_command >= 4)
         {
@@ -287,7 +301,7 @@ implementation {
             do_op[3] = 1;
             steer_angles[2] = modify_angle(steer_angles[2], rcvPayload->Steer3Status);
         }
-        printf("angle=%u %u %u, car_op=%u %u %u.\n", steer_angles[0], steer_angles[1], steer_angles[2], car_op, do_op[0], rcvPayload->Steer3Status);
+        // printf("angle=%u %u %u, car_op=%u %u %u.\n", steer_angles[0], steer_angles[1], steer_angles[2], car_op, do_op[0], rcvPayload->Steer3Status);
         deal();
         return msg;
     }
